@@ -32,6 +32,27 @@ public class JsonSchemaTest {
         );
     }
 
+    @Test
+    void test02TypeOfIdIsIntAndRequiredIsPresent(){
+        validateInputWithSchema("/02/schema02.json", "/02/input02.json");
+    }
+
+    @Test
+    void test02RequiredMissing(){
+        assertThrows(
+            ValidationException.class,
+            () -> validateInputWithSchema("/02/schema02.json", "/02/fail01requiredMissing.json")
+        );
+    }
+    @Test
+    void test02WrongType(){
+        assertThrows(
+            ValidationException.class,
+            () -> validateInputWithSchema("/02/schema02.json", "/02/fail02wrongType.json")
+        );
+    }
+
+
     private void validateInputWithSchema(String schemaFileName, String inputFileName) {
         try (
             InputStream schemaStream = getClass().getResourceAsStream(schemaFileName);
