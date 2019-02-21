@@ -89,6 +89,21 @@ public class JsonSchemaTest {
         validateExceptionMessage("/04/schema04.json", "/04/fail04notArray.json", "#/tags: expected type: JSONArray, found: Null");
     }
 
+    @Test
+    void test05NestedObject() {
+        validateInputWithSchema("/05/schema05.json", "/05/input05.json");
+    }
+
+    @Test
+    void test05NestedObjectMissingProperty() {
+        validateExceptionMessage("/05/schema05.json", "/05/fail05missingNestedProperty.json", "#/dimensions: required key [width] not found");
+    }
+
+    @Test
+    void test05WrongNestedType() {
+        validateExceptionMessage("/05/schema05.json", "/05/fail05wrongNestedType.json", "#/dimensions/height: expected type: Number, found: Null");
+    }
+
     private void validateInputWithSchema(String schemaFileName, String inputFileName) {
         try (
             InputStream schemaStream = getClass().getResourceAsStream(schemaFileName);

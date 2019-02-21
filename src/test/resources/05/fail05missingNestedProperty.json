@@ -1,0 +1,13 @@
+{
+  "productId": 123,
+  "productName": "My Product",
+  "price": 100,
+  "tags": [
+    "asdf",
+    "qwer"
+  ],
+  "dimensions": {
+    "height": 1,
+    "length": 10
+  }
+}
