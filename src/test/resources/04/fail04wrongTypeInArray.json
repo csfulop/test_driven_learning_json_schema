@@ -1,0 +1,10 @@
+{
+  "productId": 123,
+  "productName": "My Product",
+  "price": 100,
+  "tags": [
+    "asdf",
+    "qwer",
+    1234
+  ]
+}

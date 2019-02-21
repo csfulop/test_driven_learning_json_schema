@@ -56,7 +56,37 @@ public class JsonSchemaTest {
 
     @Test
     void test03LowerThanMinimum() {
-        validateExceptionMessage("/03/schema03.json", "/03/fail03lowerThanMinimum.json","#/price: 0 is not greater than 0");
+        validateExceptionMessage("/03/schema03.json", "/03/fail03lowerThanMinimum.json", "#/price: 0 is not greater than 0");
+    }
+
+    @Test
+    void test04TagsShouldBeANonEmptyList() {
+        validateInputWithSchema("/04/schema04.json", "/04/input04.json");
+    }
+
+    @Test
+    void test04OptionalPropertyCanBeMissing() {
+        validateInputWithSchema("/04/schema04.json", "/04/input04optionalMissing.json");
+    }
+
+    @Test
+    void test04TagsArraySouldBeUnique() {
+        validateExceptionMessage("/04/schema04.json", "/04/fail04notUnique.json", "#/tags: array items are not unique");
+    }
+
+    @Test
+    void test04TagsArraySouldNotBeEmpty() {
+        validateExceptionMessage("/04/schema04.json", "/04/fail04emptyArray.json", "#/tags: expected minimum item count: 1, found: 0");
+    }
+
+    @Test
+    void test04WrongTypeInArray() {
+        validateExceptionMessage("/04/schema04.json", "/04/fail04wrongTypeInArray.json", "#/tags/2: expected type: String, found: Integer");
+    }
+
+    @Test
+    void test04TagsShouldBeArray() {
+        validateExceptionMessage("/04/schema04.json", "/04/fail04notArray.json", "#/tags: expected type: JSONArray, found: Null");
     }
 
     private void validateInputWithSchema(String schemaFileName, String inputFileName) {
