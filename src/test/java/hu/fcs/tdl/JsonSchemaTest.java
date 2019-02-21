@@ -12,6 +12,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -33,25 +35,19 @@ public class JsonSchemaTest {
     }
 
     @Test
-    void test02TypeOfIdIsIntAndRequiredIsPresent(){
+    void test02TypeOfIdIsIntAndRequiredIsPresent() {
         validateInputWithSchema("/02/schema02.json", "/02/input02.json");
     }
 
     @Test
-    void test02RequiredMissing(){
-        assertThrows(
-            ValidationException.class,
-            () -> validateInputWithSchema("/02/schema02.json", "/02/fail01requiredMissing.json")
-        );
-    }
-    @Test
-    void test02WrongType(){
-        assertThrows(
-            ValidationException.class,
-            () -> validateInputWithSchema("/02/schema02.json", "/02/fail02wrongType.json")
-        );
+    void test02RequiredMissing() {
+        validateExceptionMessage("/02/schema02.json", "/02/fail01requiredMissing.json", "#: required key [productId] not found");
     }
 
+    @Test
+    void test02WrongType() {
+        validateExceptionMessage("/02/schema02.json", "/02/fail02wrongType.json", "#/productId: expected type: Number, found: String");
+    }
 
     private void validateInputWithSchema(String schemaFileName, String inputFileName) {
         try (
@@ -72,5 +68,13 @@ public class JsonSchemaTest {
         } catch (IOException e) {
             fail(e);
         }
+    }
+
+    private void validateExceptionMessage(String schemaFileName, String inputFileName, String exceptionMessage) {
+        ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validateInputWithSchema(schemaFileName, inputFileName)
+        );
+        assertThat(exception.getMessage(), is(exceptionMessage));
     }
 }

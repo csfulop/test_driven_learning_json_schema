@@ -1,3 +1,4 @@
 {
-  "productId": 123
+  "productId": 123,
+  "productName": "My Product"
 }

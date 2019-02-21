@@ -8,7 +8,14 @@
     "productId": {
       "description": "The unique identifier of a product",
       "type": "integer"
+    },
+    "productName": {
+      "description": "Name of the product",
+      "type": "string"
     }
   },
-  "required": ["productId"]
+  "required": [
+    "productId",
+    "productName"
+  ]
 }
