@@ -49,6 +49,16 @@ public class JsonSchemaTest {
         validateExceptionMessage("/02/schema02.json", "/02/fail02wrongType.json", "#/productId: expected type: Number, found: String");
     }
 
+    @Test
+    void test03Minimum() {
+        validateInputWithSchema("/03/schema03.json", "/03/input03.json");
+    }
+
+    @Test
+    void test03LowerThanMinimum() {
+        validateExceptionMessage("/03/schema03.json", "/03/fail03lowerThanMinimum.json","#/price: 0 is not greater than 0");
+    }
+
     private void validateInputWithSchema(String schemaFileName, String inputFileName) {
         try (
             InputStream schemaStream = getClass().getResourceAsStream(schemaFileName);
