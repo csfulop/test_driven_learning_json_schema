@@ -1,0 +1,18 @@
+{
+  "productId": 123,
+  "productName": "My Product",
+  "price": 100,
+  "tags": [
+    "asdf",
+    "qwer"
+  ],
+  "dimensions": {
+    "width": 5,
+    "height": 1,
+    "length": 10
+  },
+  "warehouseLocation": {
+    "latitude": 47.49801,
+    "longitude": 19.03991
+  }
+}

@@ -9,8 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -104,19 +107,39 @@ public class JsonSchemaTest {
         validateExceptionMessage("/05/schema05.json", "/05/fail05wrongNestedType.json", "#/dimensions/height: expected type: Number, found: Null");
     }
 
+    @Test
+    void test06SchemaReference() {
+        validateInputWithSchemaAndRef(
+            "/06/schema06.json", "/06/input06.json",
+            "http://example.com/location.schema.json", "/06/locationSchema.json"
+        );
+    }
+
     private void validateInputWithSchema(String schemaFileName, String inputFileName) {
+        SchemaLoader.SchemaLoaderBuilder builder = SchemaLoader.builder();
+        validateInputWithSchema(schemaFileName, inputFileName, builder);
+    }
+
+    private void validateInputWithSchemaAndRef(String schemaFileName, String inputFileName, String refURI, String refFileName) {
         try (
-            InputStream schemaStream = getClass().getResourceAsStream(schemaFileName);
-            InputStream inputStream = getClass().getResourceAsStream(inputFileName);
+            InputStream refStream = new FileInputStream("./src/test/resources/" + refFileName);
         ) {
-            if (schemaStream == null) {
-                fail("resource file: " + schemaFileName + " doesn't exists");
-            }
-            if (inputStream == null) {
-                fail("resource file: " + inputFileName + " doesn't exists");
-            }
+            JSONObject refSchemaJson = new JSONObject(new JSONTokener(refStream));
+            SchemaLoader.SchemaLoaderBuilder builder = SchemaLoader.builder().registerSchemaByURI(new URI(refURI), refSchemaJson);
+            validateInputWithSchema(schemaFileName, inputFileName, builder);
+        } catch (IOException | URISyntaxException e) {
+            fail(e);
+        }
+    }
+
+    private void validateInputWithSchema(String schemaFileName, String inputFileName, SchemaLoader.SchemaLoaderBuilder builder) {
+        try (
+            InputStream schemaStream = new FileInputStream("./src/test/resources" + schemaFileName);
+            InputStream inputStream = new FileInputStream("./src/test/resources" + inputFileName);
+        ) {
             JSONObject schemaJson = new JSONObject(new JSONTokener(schemaStream));
-            Schema schema = SchemaLoader.load(schemaJson);
+            SchemaLoader schemaLoader = builder.schemaJson(schemaJson).build();
+            Schema schema = schemaLoader.load().build();
             JSONTokener tokener = new JSONTokener(inputStream);
             Object value = tokener.nextValue();
             schema.validate(value);
