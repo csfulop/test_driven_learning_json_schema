@@ -1,6 +1,8 @@
 package hu.fcs.tdl;
 
+import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.StringSchema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -16,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -115,6 +118,29 @@ public class JsonSchemaTest {
         );
     }
 
+    @Test
+    void test07PrintJsonSchema() {
+        // given
+        Schema schema = loadSchema("/05/schema05.json");
+        // when
+        String schemaStr = schema.toString();
+        // then
+        assertThat(schemaStr, containsString("\"Name of the product\""));
+        assertThat(schemaStr, containsString("\"width\":{\"type\":\"number\"}"));
+    }
+
+    @Test
+    void test08BuildJsonSchema() {
+        // given
+        StringSchema stringSchema = StringSchema.builder().build();
+        ObjectSchema.Builder builder = ObjectSchema.builder().addPropertySchema("name", stringSchema);
+        Schema schema = new ObjectSchema(builder);
+        // when
+        String schemaStr = schema.toString();
+        // then
+        assertThat(schemaStr, is("{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}"));
+    }
+
     private void validateInputWithSchema(String schemaFileName, String inputFileName) {
         SchemaLoader.SchemaLoaderBuilder builder = SchemaLoader.builder();
         validateInputWithSchema(schemaFileName, inputFileName, builder);
@@ -134,12 +160,9 @@ public class JsonSchemaTest {
 
     private void validateInputWithSchema(String schemaFileName, String inputFileName, SchemaLoader.SchemaLoaderBuilder builder) {
         try (
-            InputStream schemaStream = new FileInputStream("./src/test/resources" + schemaFileName);
             InputStream inputStream = new FileInputStream("./src/test/resources" + inputFileName);
         ) {
-            JSONObject schemaJson = new JSONObject(new JSONTokener(schemaStream));
-            SchemaLoader schemaLoader = builder.schemaJson(schemaJson).build();
-            Schema schema = schemaLoader.load().build();
+            Schema schema = loadSchema(schemaFileName, builder);
             JSONTokener tokener = new JSONTokener(inputStream);
             Object value = tokener.nextValue();
             schema.validate(value);
@@ -147,6 +170,26 @@ public class JsonSchemaTest {
             fail(e);
         }
     }
+
+    private Schema loadSchema(String schemaFileName) {
+        return loadSchema(schemaFileName, SchemaLoader.builder());
+    }
+
+    private Schema loadSchema(String schemaFileName, SchemaLoader.SchemaLoaderBuilder builder) {
+        Schema schema = null;
+        try (
+            InputStream schemaStream = new FileInputStream("./src/test/resources" + schemaFileName);
+
+        ) {
+            JSONObject schemaJson = new JSONObject(new JSONTokener(schemaStream));
+            SchemaLoader schemaLoader = builder.schemaJson(schemaJson).build();
+            schema = schemaLoader.load().build();
+        } catch (IOException e) {
+            fail(e);
+        }
+        return schema;
+    }
+
 
     private void validateExceptionMessage(String schemaFileName, String inputFileName, String exceptionMessage) {
         ValidationException exception = assertThrows(
